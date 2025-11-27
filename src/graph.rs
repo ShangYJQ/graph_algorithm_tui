@@ -1,6 +1,11 @@
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
 
+pub enum EdgeType {
+    Single,
+    Both,
+}
+
 #[derive(Copy, Clone, Eq, PartialEq)]
 struct State {
     cost: i64,
@@ -30,8 +35,17 @@ impl Graph {
         }
     }
 
-    pub fn add_edge(&mut self, u: i64, v: i64, w: i64) {
-        self.adj.entry(u).or_insert(Vec::new()).push((v, w));
+    pub fn add_edge(&mut self, u: i64, v: i64, w: i64, edge_type: EdgeType) {
+        match edge_type {
+            EdgeType::Single => {
+                self.adj.entry(u).or_insert(Vec::new()).push((v, w));
+            }
+
+            EdgeType::Both => {
+                self.adj.entry(u).or_insert(Vec::new()).push((v, w));
+                self.adj.entry(v).or_insert(Vec::new()).push((u, w));
+            }
+        }
     }
 
     pub fn dijkstra(&self, s: i64) {
