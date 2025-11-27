@@ -137,7 +137,6 @@ impl App {
 
             self.graph.update(self.dt as f32);
             terminal.draw(|frame| self.draw(frame))?;
-            thread::sleep(Duration::from_secs_f64(self.dt));
         }
         Ok(())
     }
@@ -173,7 +172,7 @@ impl App {
     }
 
     fn handle_events(&mut self) -> io::Result<()> {
-        if (event::poll(Duration::from_secs_f64(self.dt))?) {
+        if (event::poll(Duration::from_secs_f32(self.dt as f32))?) {
             match event::read()? {
                 Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
                     let limit_x = self.screen_max_x - self.r;

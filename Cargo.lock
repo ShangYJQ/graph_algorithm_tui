@@ -289,6 +289,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e629b9b98ef3dd8afe6ca2bd0f89306cec16d43d907889945bc5d6687f2f13c7"
 
 [[package]]
+name = "graph_algorithm_tui"
+version = "0.1.0"
+dependencies = [
+ "color-eyre",
+ "crossterm 0.29.0",
+ "force_graph",
+ "itertools",
+ "ratatui",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -784,17 +795,6 @@ dependencies = [
  "sharded-slab",
  "thread_local",
  "tracing-core",
-]
-
-[[package]]
-name = "tui"
-version = "0.1.0"
-dependencies = [
- "color-eyre",
- "crossterm 0.29.0",
- "force_graph",
- "itertools",
- "ratatui",
 ]
 
 [[package]]

@@ -1,4 +1,4 @@
-use tui::graph::{EdgeType::Both, EdgeType::Single, Graph};
+use graph_algorithm_tui::graph::{EdgeType::Both, EdgeType::Single, Graph};
 
 #[test]
 fn runs_main_logic_without_panic() {
