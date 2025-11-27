@@ -5,4 +5,7 @@ edition = "2024"
 
 [dependencies]
 ratatui = "0.29.0"
-crossterm = "0.28.1"
+crossterm = "0.29.0"
+itertools = "0.13.0"
+color-eyre = "0.6.5"
+force_graph = "0.4.0"
