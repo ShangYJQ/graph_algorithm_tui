@@ -78,9 +78,9 @@ impl Graph {
         }
 
         // println!("dijkstra:");
-        for (v, w) in dist {
-            // println!("to: {} dist: {}", v, w)
-        }
+        // for (v, w) in dist {
+        // println!("to: {} dist: {}", v, w)
+        // }
     }
 
     pub fn prim(&self, s: i64) {
@@ -90,7 +90,7 @@ impl Graph {
         let mut parent: HashMap<i64, i64> = HashMap::new();
         let mut pq: BinaryHeap<State> = BinaryHeap::new();
 
-        let mut total_cost: i64 = 0i64;
+        // let mut total_cost: i64 = 0i64;
         dist.insert(s, 0);
         pq.push(State { cost: 0, node: s });
 
@@ -104,10 +104,10 @@ impl Graph {
             }
             booked.insert(u);
 
-            if let Some(&_p) = parent.get(&u) {
-                // println!("{}->{} weight: {}", p, u, cost);
-                total_cost += cost;
-            }
+            // if let Some(&_p) = parent.get(&u) {
+            //     // println!("{}->{} weight: {}", p, u, cost);
+            //     total_cost += cost;
+            // }
 
             if let Some(v_list) = self.adj.get(&u) {
                 for &(v, w) in v_list {

@@ -1,22 +1,19 @@
-use color_eyre::owo_colors::OwoColorize;
 use crossterm::event;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use force_graph::{DefaultNodeIdx, ForceGraph, NodeData, SimulationParameters};
-use graph_algorithm_tui::graph::{EdgeType, Graph};
+use graph_algorithm_tui::graph::EdgeType::Both;
+use graph_algorithm_tui::graph::Graph;
 use rand::Rng;
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use ratatui::prelude::{Color, Widget};
 use ratatui::style::Stylize;
-use ratatui::symbols::border;
-use ratatui::text::{Line, Text};
+use ratatui::widgets::Block;
 use ratatui::widgets::canvas::{Canvas, Circle, Context, Line as CanvaLine};
-use ratatui::widgets::{Block, Paragraph};
 use ratatui::{DefaultTerminal, Frame};
 use std::collections::HashMap;
+use std::io;
 use std::time::Duration;
-use std::{io, thread};
-use graph_algorithm_tui::graph::EdgeType::Both;
 
 fn main() -> io::Result<()> {
     let mut terminal = ratatui::init();
@@ -65,7 +62,7 @@ impl App {
                 force_spring: 15.0,
                 force_max: 200.0,
                 node_speed: 10000.0,
-                damping_factor: 0.8,
+                damping_factor: 0.85,
             }),
 
             exit: false,
@@ -126,12 +123,12 @@ impl App {
     }
 
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
-
-        self.data_graph.add_edge(1,2,1,Both);
-        self.data_graph.add_edge(1,3,1,Both);
-        self.data_graph.add_edge(3,4,1,Both);
-        self.data_graph.add_edge(3,5,1,Both);
-        self.data_graph.add_edge(5,4,1,Both);
+        self.data_graph.add_edge(1, 2, 1, Both);
+        self.data_graph.add_edge(1, 3, 1, Both);
+        self.data_graph.add_edge(3, 4, 1, Both);
+        self.data_graph.add_edge(3, 5, 1, Both);
+        self.data_graph.add_edge(5, 4, 1, Both);
+        self.data_graph.add_edge(1, 6, 1, Both);
 
         self.init_graph();
         while !self.exit {
@@ -191,8 +188,8 @@ impl App {
     }
 
     fn handle_events(&mut self) -> io::Result<()> {
-        if (event::poll(Duration::from_secs_f32(self.dt as f32))?) {
-            match event::read()? {
+        match event::poll(Duration::from_secs_f32(self.dt as f32))? {
+            true => match event::read()? {
                 Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
                     let limit_x = self.screen_max_x - self.r;
                     let limit_y = self.screen_max_y - self.r;
@@ -218,7 +215,8 @@ impl App {
                     }
                 }
                 _ => {}
-            }
+            },
+            false => (),
         }
 
         Ok(())
