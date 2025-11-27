@@ -2,6 +2,8 @@ use color_eyre::owo_colors::OwoColorize;
 use crossterm::event;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use force_graph::{DefaultNodeIdx, ForceGraph, NodeData, SimulationParameters};
+use graph_algorithm_tui::graph::{EdgeType, Graph};
+use rand::Rng;
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use ratatui::prelude::{Color, Widget};
@@ -11,8 +13,10 @@ use ratatui::text::{Line, Text};
 use ratatui::widgets::canvas::{Canvas, Circle, Context, Line as CanvaLine};
 use ratatui::widgets::{Block, Paragraph};
 use ratatui::{DefaultTerminal, Frame};
+use std::collections::HashMap;
 use std::time::Duration;
 use std::{io, thread};
+use graph_algorithm_tui::graph::EdgeType::Both;
 
 fn main() -> io::Result<()> {
     let mut terminal = ratatui::init();
@@ -24,6 +28,8 @@ fn main() -> io::Result<()> {
 }
 
 struct App {
+    data_graph: Graph,
+
     screen_max_x: f64,
     screen_max_y: f64,
 
@@ -42,6 +48,8 @@ struct App {
 impl App {
     pub fn new() -> Self {
         Self {
+            data_graph: Graph::new(),
+
             screen_max_x: 20.0,
             screen_max_y: 10.0,
 
@@ -53,7 +61,7 @@ impl App {
 
             anchor_idx: None,
             graph: ForceGraph::new(SimulationParameters {
-                force_charge: 0.7,
+                force_charge: 1.0,
                 force_spring: 15.0,
                 force_max: 200.0,
                 node_speed: 10000.0,
@@ -63,57 +71,68 @@ impl App {
             exit: false,
         }
     }
-
     pub fn init_graph(&mut self) {
-        let n1_idx = self.graph.add_node(NodeData {
-            x: self.anchor_x as f32,
-            y: self.anchor_y as f32,
-            is_anchor: true,
-            user_data: 1,
-            ..Default::default()
-        });
+        let mut rng = rand::rng();
 
-        self.anchor_idx = Some(n1_idx);
+        let mut nodes = self.data_graph.nodes();
 
-        let n2_idx = self.graph.add_node(NodeData {
-            x: 0.0,
-            y: 0.0,
-            user_data: 2,
+        if nodes.is_empty() {
+            let n1_idx = self.graph.add_node(NodeData {
+                x: self.anchor_x as f32,
+                y: self.anchor_y as f32,
+                is_anchor: true,
+                user_data: 1,
+                ..Default::default()
+            });
+            self.anchor_idx = Some(n1_idx);
+            return;
+        }
 
-            ..Default::default()
-        });
-        let n3_idx = self.graph.add_node(NodeData {
-            x: -0.0,
-            y: 0.0,
-            user_data: 3,
+        nodes.sort();
 
-            ..Default::default()
-        });
-        let n4_idx = self.graph.add_node(NodeData {
-            x: -0.0,
-            y: -0.1,
+        let mut id_to_idx: HashMap<i64, DefaultNodeIdx> = HashMap::new();
+        let mut anchor_idx: Option<DefaultNodeIdx> = None;
 
-            user_data: 4,
+        for node_id in nodes {
+            let is_anchor = node_id == 1;
+            let (x, y) = if is_anchor {
+                (self.anchor_x as f32, self.anchor_y as f32)
+            } else {
+                (rng.random_range(-1.0..1.0), rng.random_range(-1.0..1.0))
+            };
 
-            ..Default::default()
-        });
-        let n5_idx = self.graph.add_node(NodeData {
-            x: -0.0,
-            y: -0.0,
+            let idx = self.graph.add_node(NodeData {
+                x,
+                y,
+                is_anchor,
+                user_data: node_id,
+                ..Default::default()
+            });
 
-            user_data: 5,
+            if is_anchor {
+                anchor_idx = Some(idx);
+            }
 
-            ..Default::default()
-        });
+            id_to_idx.insert(node_id, idx);
+        }
 
-        self.graph.add_edge(n1_idx, n3_idx, Default::default());
-        self.graph.add_edge(n1_idx, n2_idx, Default::default());
-        self.graph.add_edge(n2_idx, n5_idx, Default::default());
+        self.anchor_idx = anchor_idx;
 
-        self.graph.add_edge(n2_idx, n4_idx, Default::default());
+        for (u, v, _w) in self.data_graph.edges() {
+            if let (Some(&u_idx), Some(&v_idx)) = (id_to_idx.get(&u), id_to_idx.get(&v)) {
+                self.graph.add_edge(u_idx, v_idx, Default::default());
+            }
+        }
     }
 
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
+
+        self.data_graph.add_edge(1,2,1,Both);
+        self.data_graph.add_edge(1,3,1,Both);
+        self.data_graph.add_edge(3,4,1,Both);
+        self.data_graph.add_edge(3,5,1,Both);
+        self.data_graph.add_edge(5,4,1,Both);
+
         self.init_graph();
         while !self.exit {
             self.handle_events()?;
@@ -194,7 +213,7 @@ impl App {
 
                         KeyCode::Char('+') => self.r += 0.1,
                         KeyCode::Char('-') => self.r -= 0.1,
-                        KeyCode::Esc => self.exit = true,
+                        KeyCode::Char('q') => self.exit = true,
                         _ => {}
                     }
                 }

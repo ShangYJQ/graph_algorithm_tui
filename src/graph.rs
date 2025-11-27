@@ -77,9 +77,9 @@ impl Graph {
             }
         }
 
-        println!("dijkstra:");
+        // println!("dijkstra:");
         for (v, w) in dist {
-            println!("to: {} dist: {}", v, w)
+            // println!("to: {} dist: {}", v, w)
         }
     }
 
@@ -94,7 +94,7 @@ impl Graph {
         dist.insert(s, 0);
         pq.push(State { cost: 0, node: s });
 
-        println!("prim:");
+        // println!("prim:");
         while let Some(State { cost, node: u }) = pq.pop() {
             if booked.contains(&u) {
                 continue;
@@ -104,8 +104,8 @@ impl Graph {
             }
             booked.insert(u);
 
-            if let Some(&p) = parent.get(&u) {
-                println!("{}->{} weight: {}", p, u, cost);
+            if let Some(&_p) = parent.get(&u) {
+                // println!("{}->{} weight: {}", p, u, cost);
                 total_cost += cost;
             }
 
@@ -119,7 +119,7 @@ impl Graph {
                 }
             }
         }
-        println!("total cost: {}", total_cost);
+        // println!("total cost: {}", total_cost);
     }
 
     pub fn bfs(&self, s: i64) {
@@ -129,7 +129,7 @@ impl Graph {
         q.push_back(s);
         visited.insert(s);
 
-        print!("bfs:\n {} ", s);
+        // print!("bfs:\n {} ", s);
         while !q.is_empty() {
             let u = q.pop_front();
             match u {
@@ -139,7 +139,7 @@ impl Graph {
                             if !visited.contains(&v) {
                                 q.push_back(v);
                                 visited.insert(v);
-                                print!(" {} ", v);
+                                // print!(" {} ", v);
                             }
                         }
                     }
@@ -147,13 +147,13 @@ impl Graph {
                 _ => println!("error"),
             }
         }
-        println!()
+        // println!()
     }
     pub fn dfs(&mut self, s: i64) {
         let mut visited: HashSet<i64> = HashSet::new();
-        print!("dfs遍历顺序:\n {} ", s);
+        // print!("dfs遍历顺序:\n {} ", s);
         self.dfs_helper(s, &mut visited);
-        println!()
+        // println!()
     }
 
     fn dfs_helper(&self, curr: i64, visited: &mut HashSet<i64>) -> bool {
@@ -161,7 +161,7 @@ impl Graph {
         if let Some(v_list) = self.adj.get(&curr) {
             for &(v, _) in v_list {
                 if !visited.contains(&v) {
-                    print!(" {} ", v);
+                    // print!(" {} ", v);
                     if self.dfs_helper(v, visited) {
                         return true;
                     }
@@ -169,5 +169,32 @@ impl Graph {
             }
         }
         false
+    }
+
+    pub fn nodes(&self) -> Vec<i64> {
+        let mut set: HashSet<i64> = HashSet::new();
+        for (&u, v_list) in &self.adj {
+            set.insert(u);
+            for &(v, _) in v_list {
+                set.insert(v);
+            }
+        }
+        set.into_iter().collect()
+    }
+
+    pub fn edges(&self) -> Vec<(i64, i64, i64)> {
+        let mut result = Vec::new();
+        let mut seen = HashSet::new();
+
+        for (&u, v_list) in &self.adj {
+            for &(v, w) in v_list {
+                let key = if u <= v { (u, v) } else { (v, u) };
+                if seen.insert(key) {
+                    result.push((u, v, w));
+                }
+            }
+        }
+
+        result
     }
 }
