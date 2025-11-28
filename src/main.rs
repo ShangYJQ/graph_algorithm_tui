@@ -76,7 +76,7 @@ impl App {
 
             anchor_idx: None,
             graph: ForceGraph::new(SimulationParameters {
-                force_charge: 1.0,
+                force_charge: 4.0,
                 force_spring: 15.0,
                 force_max: 200.0,
                 node_speed: 10000.0,
@@ -163,12 +163,23 @@ impl App {
     }
 
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
-        self.data_graph.add_edge(1, 2, 2, Both);
-        self.data_graph.add_edge(1, 3, 3, Both);
-        self.data_graph.add_edge(3, 4, 5, Both);
-        self.data_graph.add_edge(3, 5, 4, Both);
-        self.data_graph.add_edge(5, 4, 1, Both);
-        self.data_graph.add_edge(1, 6, 6, Both);
+        self.data_graph.add_edge(5, 9, 650, Both);
+        self.data_graph.add_edge(7, 9, 1140, Both);
+        self.data_graph.add_edge(9, 10, 750, Both);
+        self.data_graph.add_edge(4, 8, 960, Both);
+        self.data_graph.add_edge(5, 8, 820, Both);
+        self.data_graph.add_edge(5, 4, 1200, Both);
+        self.data_graph.add_edge(8, 10, 680, Both);
+        self.data_graph.add_edge(9, 8, 800, Both);
+        self.data_graph.add_edge(6, 2, 340, Both);
+        self.data_graph.add_edge(6, 7, 840, Both);
+        self.data_graph.add_edge(1, 3, 1380, Both);
+        self.data_graph.add_edge(1, 2, 900, Both);
+        self.data_graph.add_edge(1, 4, 680, Both);
+        self.data_graph.add_edge(1, 5, 530, Both);
+        self.data_graph.add_edge(3, 2, 2500, Both);
+        self.data_graph.add_edge(3, 4, 2600, Both);
+        self.data_graph.add_edge(7, 5, 570, Both);
 
         self.init_graph();
         while !self.exit {
