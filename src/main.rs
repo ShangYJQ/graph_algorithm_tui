@@ -4,12 +4,11 @@ use force_graph::{DefaultNodeIdx, ForceGraph, NodeData, SimulationParameters};
 use graph_algorithm_tui::graph::EdgeType::Both;
 use graph_algorithm_tui::graph::Graph;
 use rand::Rng;
-use ratatui::buffer::Buffer;
-use ratatui::layout::{Constraint, Layout, Rect};
+use ratatui::layout::{Constraint, Layout};
 use ratatui::prelude::{Color, Direction};
 use ratatui::style::Stylize;
 use ratatui::widgets::canvas::{Canvas, Circle, Context, Line as CanvaLine};
-use ratatui::widgets::{Block, Borders, Paragraph};
+use ratatui::widgets::{Block, Borders};
 use ratatui::{DefaultTerminal, Frame};
 use std::collections::HashMap;
 use std::io;
@@ -201,7 +200,7 @@ impl App {
                 y1: node1.y() as f64,
                 x2: node2.x() as f64,
                 y2: node2.y() as f64,
-                color: Color::Blue,
+                color: Color::LightBlue,
             });
         });
 
@@ -210,7 +209,7 @@ impl App {
                 x: node.x() as f64,
                 y: node.y() as f64,
                 radius: self.r,
-                color: Color::Green,
+                color: Color::LightYellow,
             });
             ctx.print(
                 node.x() as f64,
@@ -221,18 +220,23 @@ impl App {
     }
 
     fn run_dfs(&self) {
-        todo!()
+        self.data_graph.dfs(1);
+        //show steps
     }
 
     fn run_bfs(&self) {
-        todo!()
+        self.data_graph.bfs(1);
+        //show steps
     }
     fn run_prim(&self) {
-        todo!()
+        self.data_graph.prim(1);
+        //show steps
     }
     fn run_dijkstra(&self) {
-        todo!()
+        self.data_graph.dijkstra(1);
+        //show steps
     }
+    
     fn handle_events(&mut self) -> io::Result<()> {
         match event::poll(Duration::from_secs_f32(self.dt as f32))? {
             true => match event::read()? {

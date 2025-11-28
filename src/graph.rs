@@ -149,7 +149,7 @@ impl Graph {
         }
         // println!()
     }
-    pub fn dfs(&mut self, s: i64) {
+    pub fn dfs(&self, s: i64) {
         let mut visited: HashSet<i64> = HashSet::new();
         // print!("dfs遍历顺序:\n {} ", s);
         self.dfs_helper(s, &mut visited);
