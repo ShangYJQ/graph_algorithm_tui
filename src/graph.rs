@@ -48,8 +48,12 @@ impl Graph {
         }
     }
 
-    pub fn dijkstra(&self, s: i64) {
+    pub fn dijkstra(&self, s: i64) -> (Vec<i64>, Vec<(i64, i64)>, HashMap<i64, i64>, HashMap<i64, i64>) {
         let mut dist: HashMap<i64, i64> = HashMap::new();
+        let mut parent: HashMap<i64, i64> = HashMap::new();
+        let mut visited_nodes: Vec<i64> = Vec::new();
+        let mut visited_edges: Vec<(i64, i64)> = Vec::new();
+        let mut processed: HashSet<i64> = HashSet::new();
 
         let mut pq: BinaryHeap<State> = BinaryHeap::new();
 
@@ -63,12 +67,18 @@ impl Graph {
                     if u.cost > *dist.get(&u.node).unwrap_or(&i64::MAX) {
                         continue;
                     }
+                    if !processed.contains(&u.node) {
+                        visited_nodes.push(u.node);
+                        processed.insert(u.node);
+                    }
                     if let Some(v_list) = self.adj.get(&u.node) {
                         for &(v, w) in v_list {
                             let cost = u.cost + w;
                             if cost < *dist.get(&v).unwrap_or(&i64::MAX) {
                                 dist.insert(v, cost);
+                                parent.insert(v, u.node);
                                 pq.push(State { cost, node: v });
+                                visited_edges.push((u.node, v));
                             }
                         }
                     }
@@ -77,24 +87,22 @@ impl Graph {
             }
         }
 
-        // println!("dijkstra:");
-        // for (v, w) in dist {
-        // println!("to: {} dist: {}", v, w)
-        // }
+        (visited_nodes, visited_edges, dist, parent)
     }
 
-    pub fn prim(&self, s: i64) {
+    pub fn prim(&self, s: i64) -> (Vec<i64>, Vec<(i64, i64)>, i64) {
         let mut dist: HashMap<i64, i64> = HashMap::new();
         let mut booked: HashSet<i64> = HashSet::new();
+        let mut visited_nodes: Vec<i64> = Vec::new();
+        let mut visited_edges: Vec<(i64, i64)> = Vec::new();
 
         let mut parent: HashMap<i64, i64> = HashMap::new();
         let mut pq: BinaryHeap<State> = BinaryHeap::new();
+        let mut total_cost: i64 = 0;
 
-        // let mut total_cost: i64 = 0i64;
         dist.insert(s, 0);
         pq.push(State { cost: 0, node: s });
 
-        // println!("prim:");
         while let Some(State { cost, node: u }) = pq.pop() {
             if booked.contains(&u) {
                 continue;
@@ -103,11 +111,12 @@ impl Graph {
                 continue;
             }
             booked.insert(u);
+            visited_nodes.push(u);
 
-            // if let Some(&_p) = parent.get(&u) {
-            //     // println!("{}->{} weight: {}", p, u, cost);
-            //     total_cost += cost;
-            // }
+            if let Some(&p) = parent.get(&u) {
+                visited_edges.push((p, u));
+                total_cost += cost;
+            }
 
             if let Some(v_list) = self.adj.get(&u) {
                 for &(v, w) in v_list {
@@ -119,17 +128,20 @@ impl Graph {
                 }
             }
         }
-        // println!("total cost: {}", total_cost);
+
+        (visited_nodes, visited_edges, total_cost)
     }
 
-    pub fn bfs(&self, s: i64) {
+    pub fn bfs(&self, s: i64) -> (Vec<i64>, Vec<(i64, i64)>) {
         let mut visited: HashSet<i64> = HashSet::new();
+        let mut visited_nodes: Vec<i64> = Vec::new();
+        let mut visited_edges: Vec<(i64, i64)> = Vec::new();
         let mut q: VecDeque<i64> = VecDeque::new();
 
         q.push_back(s);
         visited.insert(s);
+        visited_nodes.push(s);
 
-        // print!("bfs:\n {} ", s);
         while !q.is_empty() {
             let u = q.pop_front();
             match u {
@@ -139,7 +151,8 @@ impl Graph {
                             if !visited.contains(&v) {
                                 q.push_back(v);
                                 visited.insert(v);
-                                // print!(" {} ", v);
+                                visited_nodes.push(v);
+                                visited_edges.push((u, v));
                             }
                         }
                     }
@@ -147,22 +160,34 @@ impl Graph {
                 _ => println!("error"),
             }
         }
-        // println!()
+
+        (visited_nodes, visited_edges)
     }
-    pub fn dfs(&self, s: i64) {
+    pub fn dfs(&self, s: i64) -> (Vec<i64>, Vec<(i64, i64)>) {
         let mut visited: HashSet<i64> = HashSet::new();
-        // print!("dfs遍历顺序:\n {} ", s);
-        self.dfs_helper(s, &mut visited);
-        // println!()
+        let mut visited_nodes: Vec<i64> = Vec::new();
+        let mut visited_edges: Vec<(i64, i64)> = Vec::new();
+        
+        self.dfs_helper(s, &mut visited, &mut visited_nodes, &mut visited_edges);
+        
+        (visited_nodes, visited_edges)
     }
 
-    fn dfs_helper(&self, curr: i64, visited: &mut HashSet<i64>) -> bool {
+    fn dfs_helper(
+        &self,
+        curr: i64,
+        visited: &mut HashSet<i64>,
+        visited_nodes: &mut Vec<i64>,
+        visited_edges: &mut Vec<(i64, i64)>,
+    ) -> bool {
         visited.insert(curr);
+        visited_nodes.push(curr);
+        
         if let Some(v_list) = self.adj.get(&curr) {
             for &(v, _) in v_list {
                 if !visited.contains(&v) {
-                    // print!(" {} ", v);
-                    if self.dfs_helper(v, visited) {
+                    visited_edges.push((curr, v));
+                    if self.dfs_helper(v, visited, visited_nodes, visited_edges) {
                         return true;
                     }
                 }
