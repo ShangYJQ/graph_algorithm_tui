@@ -36,6 +36,7 @@ struct App {
 
     dt: f64,
 
+    horizontal_split_ratio: u16,
     anchor_idx: Option<DefaultNodeIdx>,
     graph: ForceGraph<i64, i64>,
 
@@ -73,6 +74,8 @@ impl App {
             r: 0.6,
 
             dt: 0.005,
+
+            horizontal_split_ratio: 70,
 
             anchor_idx: None,
             graph: ForceGraph::new(SimulationParameters {
@@ -213,7 +216,10 @@ impl App {
     fn draw(&mut self, frame: &mut Frame) {
         let chunks = Layout::default()
             .direction(Direction::Horizontal)
-            .constraints([Constraint::Percentage(80), Constraint::Percentage(20)])
+            .constraints([
+                Constraint::Percentage(self.horizontal_split_ratio),
+                Constraint::Percentage(100 - self.horizontal_split_ratio),
+            ])
             .split(frame.area());
 
         let canva = Canvas::default()
@@ -509,6 +515,16 @@ impl App {
 
                         KeyCode::Char('+') => self.r += 0.1,
                         KeyCode::Char('-') => self.r -= 0.1,
+
+                        KeyCode::Char('a') => match self.horizontal_split_ratio < 100 {
+                            true => self.horizontal_split_ratio -= 1,
+                            false => (),
+                        },
+
+                        KeyCode::Char('d') => match self.horizontal_split_ratio > 0 {
+                            true => self.horizontal_split_ratio += 1,
+                            false => (),
+                        },
 
                         // menu
                         KeyCode::Char('j') => self.menu.down(),
