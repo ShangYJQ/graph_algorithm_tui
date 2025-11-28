@@ -3,6 +3,7 @@ use crossterm::event::{Event, KeyCode, KeyEventKind};
 use force_graph::{DefaultNodeIdx, ForceGraph, NodeData, SimulationParameters};
 use graph_algorithm_tui::graph::EdgeType::Both;
 use graph_algorithm_tui::graph::Graph;
+use graph_algorithm_tui::menu::{Menu, MenuItem, MenuSignal, MenuState};
 use rand::Rng;
 use ratatui::layout::{Constraint, Layout};
 use ratatui::prelude::{Color, Direction};
@@ -13,8 +14,6 @@ use ratatui::{DefaultTerminal, Frame};
 use std::collections::HashMap;
 use std::io;
 use std::time::Duration;
-
-use graph_algorithm_tui::menu::{Menu, MenuItem, MenuSignal, MenuState};
 
 fn main() -> io::Result<()> {
     let mut terminal = ratatui::init();
@@ -209,7 +208,7 @@ impl App {
                 x: node.x() as f64,
                 y: node.y() as f64,
                 radius: self.r,
-                color: Color::LightYellow,
+                color: Color::LightBlue,
             });
             ctx.print(
                 node.x() as f64,
@@ -236,7 +235,7 @@ impl App {
         self.data_graph.dijkstra(1);
         //show steps
     }
-    
+
     fn handle_events(&mut self) -> io::Result<()> {
         match event::poll(Duration::from_secs_f32(self.dt as f32))? {
             true => match event::read()? {
