@@ -5,15 +5,17 @@ use graph_algorithm_tui::graph::EdgeType::Both;
 use graph_algorithm_tui::graph::Graph;
 use rand::Rng;
 use ratatui::buffer::Buffer;
-use ratatui::layout::Rect;
-use ratatui::prelude::{Color, Widget};
+use ratatui::layout::{Constraint, Layout, Rect};
+use ratatui::prelude::{Color, Direction};
 use ratatui::style::Stylize;
-use ratatui::widgets::Block;
 use ratatui::widgets::canvas::{Canvas, Circle, Context, Line as CanvaLine};
+use ratatui::widgets::{Block, Borders, Paragraph};
 use ratatui::{DefaultTerminal, Frame};
 use std::collections::HashMap;
 use std::io;
 use std::time::Duration;
+
+use graph_algorithm_tui::menu::{Menu, MenuItem, MenuSignal, MenuState};
 
 fn main() -> io::Result<()> {
     let mut terminal = ratatui::init();
@@ -38,6 +40,8 @@ struct App {
 
     anchor_idx: Option<DefaultNodeIdx>,
     graph: ForceGraph<i64, i64>,
+
+    menu: MenuState,
 
     exit: bool,
 }
@@ -65,6 +69,12 @@ impl App {
                 damping_factor: 0.85,
             }),
 
+            menu: MenuState::new(vec![
+                MenuItem::new("遍历", vec![MenuItem::leaf("Dfs"), MenuItem::leaf("Bfs")]),
+                MenuItem::new("MST", vec![MenuItem::leaf("Prim")]),
+                MenuItem::new("最短路径", vec![MenuItem::leaf("Dijkstra")]),
+                MenuItem::leaf("退出"),
+            ]),
             exit: false,
         }
     }
@@ -157,8 +167,31 @@ impl App {
         Ok(())
     }
 
-    fn draw(&self, frame: &mut Frame) {
-        frame.render_widget(self, frame.area());
+    fn draw(&mut self, frame: &mut Frame) {
+        let chunks = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([Constraint::Percentage(80), Constraint::Percentage(20)])
+            .split(frame.area());
+
+        let canva = Canvas::default()
+            .block(Block::default().title("Graph").borders(Borders::ALL))
+            .x_bounds([-self.screen_max_x, self.screen_max_x])
+            .y_bounds([-self.screen_max_y, self.screen_max_y])
+            .paint(|ctx| self.render_ctx(ctx));
+
+        frame.render_widget(canva, chunks[0]);
+
+        let title = "Menu";
+
+        let menu_widget = Menu::new()
+            .block(Block::default().title(title).borders(Borders::ALL))
+            .highlight_style(
+                ratatui::style::Style::default()
+                    .bg(Color::Blue)
+                    .fg(Color::White),
+            ); // 设置高亮样式
+
+        frame.render_stateful_widget(menu_widget, chunks[1], &mut self.menu);
     }
 
     fn render_ctx(&self, ctx: &mut Context) {
@@ -187,6 +220,19 @@ impl App {
         });
     }
 
+    fn run_dfs(&self) {
+        todo!()
+    }
+
+    fn run_bfs(&self) {
+        todo!()
+    }
+    fn run_prim(&self) {
+        todo!()
+    }
+    fn run_dijkstra(&self) {
+        todo!()
+    }
     fn handle_events(&mut self) -> io::Result<()> {
         match event::poll(Duration::from_secs_f32(self.dt as f32))? {
             true => match event::read()? {
@@ -210,6 +256,23 @@ impl App {
 
                         KeyCode::Char('+') => self.r += 0.1,
                         KeyCode::Char('-') => self.r -= 0.1,
+
+                        // menu
+                        KeyCode::Char('j') => self.menu.down(),
+                        KeyCode::Char('k') => self.menu.up(),
+                        KeyCode::Char('l') | KeyCode::Enter => match self.menu.enter() {
+                            MenuSignal::Selected(name) => match name.as_str() {
+                                "Bfs" => self.run_bfs(),
+                                "Dfs" => self.run_dfs(),
+                                "Prim" => self.run_prim(),
+                                "Dijkstra" => self.run_dijkstra(),
+                                "退出" => self.exit = true,
+                                _ => {}
+                            },
+                            MenuSignal::None => {}
+                        },
+                        KeyCode::Char('h') => self.menu.back(),
+
                         KeyCode::Char('q') => self.exit = true,
                         _ => {}
                     }
@@ -223,18 +286,23 @@ impl App {
     }
 }
 
-impl Widget for &App {
-    fn render(self, area: Rect, buf: &mut Buffer) {
-        let canva = Canvas::default()
-            .block(
-                Block::default()
-                    .title("Canvas")
-                    .borders(ratatui::widgets::Borders::ALL),
-            )
-            .x_bounds([-self.screen_max_x, self.screen_max_x])
-            .y_bounds([-self.screen_max_y, self.screen_max_y])
-            .paint(|ctx| self.render_ctx(ctx));
-
-        canva.render(area, buf);
-    }
-}
+// impl ratatui::prelude::Widget for &App {
+//     fn render(self, area: Rect, buf: &mut Buffer) {
+//         let chunks = Layout::default()
+//             .direction(Direction::Horizontal)
+//             .constraints([Constraint::Percentage(80), Constraint::Percentage(20)])
+//             .split(area);
+//
+//         let canva = Canvas::default()
+//             .block(Block::default().title("Graph").borders(Borders::ALL))
+//             .x_bounds([-self.screen_max_x, self.screen_max_x])
+//             .y_bounds([-self.screen_max_y, self.screen_max_y])
+//             .paint(|ctx| self.render_ctx(ctx));
+//
+//         canva.render(chunks[0], buf);
+//
+//         Paragraph::new("")
+//             .block(Block::default().title("Menu").borders(Borders::ALL))
+//             .render(chunks[1], buf);
+//     }
+// }
