@@ -516,13 +516,13 @@ impl App {
                         KeyCode::Char('+') => self.r += 0.1,
                         KeyCode::Char('-') => self.r -= 0.1,
 
-                        KeyCode::Char('a') => match self.horizontal_split_ratio < 100 {
-                            true => self.horizontal_split_ratio -= 1,
+                        KeyCode::Char('d') => match self.horizontal_split_ratio < 100 {
+                            true => self.horizontal_split_ratio += 1,
                             false => (),
                         },
 
-                        KeyCode::Char('d') => match self.horizontal_split_ratio > 0 {
-                            true => self.horizontal_split_ratio += 1,
+                        KeyCode::Char('a') => match self.horizontal_split_ratio > 0 {
+                            true => self.horizontal_split_ratio -= 1,
                             false => (),
                         },
 
